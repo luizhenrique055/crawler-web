@@ -1,6 +1,5 @@
 package br.com.crawler;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import org.jsoup.Connection;
@@ -8,11 +7,11 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
+import br.com.Utils.DocumentHtmlUtils;
 public class CrawlerApp {
 
     public static void main(String[] args) throws Exception {
-
-        String url = "https://www.wikipedia.org/";
+        String url = "https://www.kabum.com.br/perifericos/headsets/sem-fio";
         crawlerFunction(1, url, new ArrayList<String>());
     }
 
@@ -27,9 +26,11 @@ public class CrawlerApp {
                     throw new Exception("Pagina Invalida");
 
                 for (Element link : paginaHtml.select("a[href]")) {
+
                     String proximo_link = link.absUrl("href");
 
-                    if (arrayUrlsVisitadas.contains(proximo_link) == false)
+                    if (arrayUrlsVisitadas.contains(proximo_link) == false
+                            || (arrayUrlsVisitadas.contains(proximo_link) == false && proximo_link.contains("#")))
                         crawlerFunction(profundidadePesquisa++, proximo_link, arrayUrlsVisitadas);
                 }
             }
@@ -41,19 +42,28 @@ public class CrawlerApp {
     private static Document requisicao(String url, ArrayList<String> arrayUrlsVisitadas) {
         try {
             Connection urlConexao = Jsoup.connect(url);
-            Document paginaHtml = urlConexao.get(); // rever nome
+            Document documentoHtml = urlConexao.get(); // rever nome
 
             if (urlConexao.response().statusCode() != 200)
-                return null;
+                throw new Exception("Falha na conexão"); // tirar exception generica
 
-            System.out.println("URl: " + url);
-            System.out.println("Titulo pagina Html: " + paginaHtml.title());
+            if (!DocumentHtmlUtils.verificacaoClasseValida(documentoHtml)) {
+                System.out.println("------------------------"); // teste visual
+                System.out.println("Url: " + url);
+                System.out.println("Sem conteudo para venda.");
+                System.out.println("------------------------");
+                arrayUrlsVisitadas.add(url);
+                return documentoHtml;
+            }
+
+            // insercao produto no arquivo
+            DocumentHtmlUtils.insercaoProdutoNoArquivo(documentoHtml, url);
+
             arrayUrlsVisitadas.add(url);
 
-            return paginaHtml;
-        } catch (IOException ex) {
+            return documentoHtml;
+        } catch (Exception ex) {
             return null;
         }
     }
-
 }
