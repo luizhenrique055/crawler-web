@@ -7,7 +7,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-import br.com.Utils.DocumentHtmlUtils;
+import br.com.Utils.JsoupDocumentUtils;
 public class CrawlerApp {
 
     public static void main(String[] args) throws Exception {
@@ -47,7 +47,7 @@ public class CrawlerApp {
             if (urlConexao.response().statusCode() != 200)
                 throw new Exception("Falha na conexão"); // tirar exception generica
 
-            if (!DocumentHtmlUtils.verificacaoClasseValida(documentoHtml)) {
+            if (!JsoupDocumentUtils.verificacaoClasseValida(documentoHtml)) {
                 System.out.println("------------------------"); // teste visual
                 System.out.println("Url: " + url);
                 System.out.println("Sem conteudo para venda.");
@@ -57,7 +57,7 @@ public class CrawlerApp {
             }
 
             // insercao produto no arquivo
-            DocumentHtmlUtils.insercaoProdutoNoArquivo(documentoHtml, url);
+            JsoupDocumentUtils.insercaoProdutoNoArquivo(documentoHtml, url);
 
             arrayUrlsVisitadas.add(url);
 
